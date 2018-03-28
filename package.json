@@ -1,6 +1,6 @@
 {
   "name": "@medley/serve-static",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Medley plugin for serving static files.",
   "main": "serve-static.js",
   "files": [
