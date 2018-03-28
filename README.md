@@ -1,5 +1,10 @@
 # @medley/serve-static
 
+[![npm Version](https://img.shields.io/npm/v/@medley/serve-static.svg)](https://www.npmjs.com/package/@medley/serve-static)
+[![Build Status](https://travis-ci.org/medleyjs/serve-static.svg?branch=master)](https://travis-ci.org/medleyjs/serve-static)
+[![Coverage Status](https://coveralls.io/repos/github/medleyjs/serve-static/badge.svg?branch=master)](https://coveralls.io/github/medleyjs/serve-static?branch=master)
+[![dependencies Status](https://img.shields.io/david/medleyjs/serve-static.svg)](https://david-dm.org/medleyjs/serve-static)
+
 [Medley](https://www.npmjs.com/package/@medley/medley) plugin for serving static files.
 
 ## Installation
