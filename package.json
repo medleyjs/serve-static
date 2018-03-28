@@ -4,8 +4,7 @@
   "description": "Medley plugin for serving static files.",
   "main": "serve-static.js",
   "files": [
-    "serve-static.js",
-    "lib"
+    "serve-static.js"
   ],
   "engines": {
     "node": ">=6"
