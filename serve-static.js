@@ -32,20 +32,16 @@ function serveStatic(app, options) {
     maxAge: options.maxAge,
   };
 
-  if (!app.basePath.endsWith('/')) {
-    app.get('', (req, res) => {
-      sendFile(req, res, '/');
-    });
-  }
-
   app.get('/*', (req, res) => {
-    sendFile(req, res, '/' + req.params['*']);
-  });
-
-  function sendFile(req, res, pathname) {
+    const pathname = '/' + req.params['*'];
     const stream = send(req.stream, pathname, sendOptions);
+    stream.on('directory', onDirectory);
     stream.on('headers', onHeaders);
     res.send(stream);
+  });
+
+  function onDirectory() {
+    this.error(404);
   }
 
   function onHeaders(nodeRes, filePath, stat) {

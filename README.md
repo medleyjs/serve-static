@@ -31,13 +31,13 @@ app.registerPlugin(serveStatic, {
   root: path.join(__dirname, 'static')
 });
 
-// Serve files for URLs with the "/static" prefix
-app.use('/static', (staticApp) => {
+// Serve files for URLs with the "/static/" prefix
+app.use('/static/', (staticApp) => {
   staticApp.registerPlugin(serveStatic, {
     root: path.join(__dirname, 'static')
   });
 });
-// A request to "/static/index.html" will get "index.html" in the "static" folder
+// A request to "/static/styles.css" will get "styles.css" in the "static" folder
 ```
 
 ### Options
@@ -57,7 +57,7 @@ synchronously. The function receives the following arguments:
 
 + `res` - Node's [`ServerResponse`](https://nodejs.org/api/http.html#http_class_http_serverresponse) object for the request.
 + `filePath` - The absolute path of the file that is being sent.
-+ `stats` - The [stats](https://nodejs.org/api/fs.html#fs_class_fs_stats) object of the file that is being sent.
++ `stats` - The [fs stats](https://nodejs.org/api/fs.html#fs_class_fs_stats) object of the file that is being sent.
 
 Example:
 
@@ -102,7 +102,7 @@ handler inside an [`app.use()`](https://github.com/medleyjs/medley/blob/master/d
 function:
 
 ```js
-app.use('/static', (staticApp) => {
+app.use('/static/', (staticApp) => {
   staticApp.registerPlugin(serveStatic, {
     root: path.join(__dirname, 'static')
   });

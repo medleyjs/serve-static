@@ -10,7 +10,7 @@ const testStaticRoot = path.join(__dirname, '/static');
 
 const indexContent = fs.readFileSync(path.join(testStaticRoot, 'index.html'), 'utf8');
 const stylesContent = fs.readFileSync(path.join(testStaticRoot, 'styles.css'), 'utf8');
-const nestedPageContent = fs.readFileSync(path.join(testStaticRoot, 'nested/page.html'), 'utf8');
+const nestedIndexContent = fs.readFileSync(path.join(testStaticRoot, 'nested/index.html'), 'utf8');
 
 it('should throw if the root option is undefined', () => {
   assert.throws(
@@ -105,12 +105,14 @@ it('should serve the correct files from the root', () => {
     app.inject('/'),
     app.inject('/index.html'),
     app.inject('/styles.css'),
-    app.inject('/nested/page.html'),
+    app.inject('/nested/'),
+    app.inject('/nested/index.html'),
   ]).then((results) => {
     assert.strictEqual(results[0].payload, indexContent);
     assert.strictEqual(results[1].payload, indexContent);
     assert.strictEqual(results[2].payload, stylesContent);
-    assert.strictEqual(results[3].payload, nestedPageContent);
+    assert.strictEqual(results[3].payload, nestedIndexContent);
+    assert.strictEqual(results[4].payload, nestedIndexContent);
   });
 });
 
@@ -122,17 +124,17 @@ it('should serve the correct files with a prefix', () => {
   });
 
   return Promise.all([
-    app.inject('/prefix'),
     app.inject('/prefix/'),
     app.inject('/prefix/index.html'),
     app.inject('/prefix/styles.css'),
-    app.inject('/prefix/nested/page.html'),
+    app.inject('/prefix/nested/'),
+    app.inject('/prefix/nested/index.html'),
   ]).then((results) => {
     assert.strictEqual(results[0].payload, indexContent);
     assert.strictEqual(results[1].payload, indexContent);
-    assert.strictEqual(results[2].payload, indexContent);
-    assert.strictEqual(results[3].payload, stylesContent);
-    assert.strictEqual(results[4].payload, nestedPageContent);
+    assert.strictEqual(results[2].payload, stylesContent);
+    assert.strictEqual(results[3].payload, nestedIndexContent);
+    assert.strictEqual(results[4].payload, nestedIndexContent);
   });
 });
 
@@ -148,13 +150,29 @@ it('should serve the correct files with a prefix with a trailing slash', () => {
     app.inject('/prefix/'),
     app.inject('/prefix/index.html'),
     app.inject('/prefix/styles.css'),
-    app.inject('/prefix/nested/page.html'),
+    app.inject('/prefix/nested/index.html'),
   ]).then((results) => {
     assert.strictEqual(results[0].statusCode, 404);
     assert.strictEqual(results[1].payload, indexContent);
     assert.strictEqual(results[2].payload, indexContent);
     assert.strictEqual(results[3].payload, stylesContent);
-    assert.strictEqual(results[4].payload, nestedPageContent);
+    assert.strictEqual(results[4].payload, nestedIndexContent);
+  });
+});
+
+it('should respond with a 404 to URLs without a trailing "/" if they do not point to a file', () => {
+  const app = medley();
+
+  app.use('/prefix', (subApp) => {
+    subApp.registerPlugin(serveStatic, {root: testStaticRoot});
+  });
+
+  return Promise.all([
+    app.inject('/prefix'),
+    app.inject('/prefix/nested'),
+  ]).then((results) => {
+    assert.strictEqual(results[0].statusCode, 404);
+    assert.strictEqual(results[1].statusCode, 404);
   });
 });
 
