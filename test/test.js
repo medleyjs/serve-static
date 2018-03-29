@@ -45,6 +45,24 @@ it('should throw if the root option is not an absolute path', () => {
   );
 });
 
+it('should throw if the prefix option is not a string', () => {
+  assert.throws(
+    () => serveStatic(null, {root: testStaticRoot, prefix: true}),
+    /^TypeError: The 'prefix' option must be a string$/
+  );
+  assert.throws(
+    () => serveStatic(null, {root: testStaticRoot, prefix: 10}),
+    /^TypeError: The 'prefix' option must be a string$/
+  );
+});
+
+it('should throw if the prefix option does not start with a "/"', () => {
+  assert.throws(
+    () => serveStatic(null, {root: testStaticRoot, prefix: 'v1'}),
+    /^TypeError: The 'prefix' option must start with a '\/' character$/
+  );
+});
+
 it('should throw if the setHeaders option is not a function', () => {
   assert.throws(
     () => serveStatic(null, {root: '/', setHeaders: 10}),
@@ -119,8 +137,9 @@ it('should serve the correct files from the root', () => {
 it('should serve the correct files with a prefix', () => {
   const app = medley();
 
-  app.use('/prefix', (subApp) => {
-    subApp.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.registerPlugin(serveStatic, {
+    root: testStaticRoot,
+    prefix: '/prefix',
   });
 
   return Promise.all([
@@ -141,21 +160,44 @@ it('should serve the correct files with a prefix', () => {
 it('should serve the correct files with a prefix with a trailing slash', () => {
   const app = medley();
 
-  app.use('/prefix/', (subApp) => {
+  app.registerPlugin(serveStatic, {
+    root: testStaticRoot,
+    prefix: '/prefix/',
+  });
+
+  return Promise.all([
+    app.inject('/prefix/'),
+    app.inject('/prefix/index.html'),
+    app.inject('/prefix/styles.css'),
+    app.inject('/prefix/nested/'),
+    app.inject('/prefix/nested/index.html'),
+  ]).then((results) => {
+    assert.strictEqual(results[0].payload, indexContent);
+    assert.strictEqual(results[1].payload, indexContent);
+    assert.strictEqual(results[2].payload, stylesContent);
+    assert.strictEqual(results[3].payload, nestedIndexContent);
+    assert.strictEqual(results[4].payload, nestedIndexContent);
+  });
+});
+
+it('should serve the correct files with a prefix created by app.use()', () => {
+  const app = medley();
+
+  app.use('/prefix', (subApp) => {
     subApp.registerPlugin(serveStatic, {root: testStaticRoot});
   });
 
   return Promise.all([
-    app.inject('/prefix'),
     app.inject('/prefix/'),
     app.inject('/prefix/index.html'),
     app.inject('/prefix/styles.css'),
+    app.inject('/prefix/nested/'),
     app.inject('/prefix/nested/index.html'),
   ]).then((results) => {
-    assert.strictEqual(results[0].statusCode, 404);
+    assert.strictEqual(results[0].payload, indexContent);
     assert.strictEqual(results[1].payload, indexContent);
-    assert.strictEqual(results[2].payload, indexContent);
-    assert.strictEqual(results[3].payload, stylesContent);
+    assert.strictEqual(results[2].payload, stylesContent);
+    assert.strictEqual(results[3].payload, nestedIndexContent);
     assert.strictEqual(results[4].payload, nestedIndexContent);
   });
 });
@@ -163,8 +205,9 @@ it('should serve the correct files with a prefix with a trailing slash', () => {
 it('should respond with a 404 to URLs without a trailing "/" if they do not point to a file', () => {
   const app = medley();
 
-  app.use('/prefix', (subApp) => {
-    subApp.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.registerPlugin(serveStatic, {
+    root: testStaticRoot,
+    prefix: '/prefix',
   });
 
   return Promise.all([

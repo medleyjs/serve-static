@@ -14,6 +14,14 @@ function serveStatic(app, options) {
     throw new Error("The 'root' option must be an absolute path");
   }
 
+  const prefix = options.prefix || '/';
+  if (typeof prefix !== 'string') {
+    throw new TypeError("The 'prefix' option must be a string");
+  }
+  if (prefix[0] !== '/') {
+    throw new TypeError("The 'prefix' option must start with a '/' character");
+  }
+
   const setHeaders = options.setHeaders || null;
   if (setHeaders !== null && typeof setHeaders !== 'function') {
     throw new TypeError("The 'setHeaders' option must be a function");
@@ -32,7 +40,7 @@ function serveStatic(app, options) {
     maxAge: options.maxAge,
   };
 
-  app.get('/*', (req, res) => {
+  app.get(prefix + (prefix.endsWith('/') ? '*' : '/*'), (req, res) => {
     const pathname = '/' + req.params['*'];
     const stream = send(req.stream, pathname, sendOptions);
     stream.on('directory', onDirectory);

@@ -22,31 +22,40 @@ yarn add @medley/serve-static
 ```js
 const medley = require('@medley/medley');
 const path = require('path');
-const serveStatic = require('@medley/serve-static');
 
 const app = medley();
 
-// Serve files in the "static" folder from the root "/" URL
-app.registerPlugin(serveStatic, {
+app.registerPlugin(require('@medley/serve-static'), {
   root: path.join(__dirname, 'static')
 });
-
-// Serve files for URLs with the "/static/" prefix
-app.use('/static/', (staticApp) => {
-  staticApp.registerPlugin(serveStatic, {
-    root: path.join(__dirname, 'static')
-  });
-});
-// A request to "/static/styles.css" will get "styles.css" in the "static" folder
+// Serves files in the './static' folder from the root "/" URL
 ```
 
 ### Options
 
 #### `root` (required)
 
-The absolute path of the directory that contains the files to serve.
-The file to serve will be determined by combining `req.url` with the
-provided root directory.
+The absolute path of the directory that contains the files to serve. The
+file to serve will be determined by combining this value with `req.url`.
+
+#### `prefix`
+
+Default: `'/'`
+
+A URL prefix that serves as a virtual mount path for the static directory.
+
+```js
+const medley = require('@medley/medley');
+const path = require('path');
+
+const app = medley();
+
+app.registerPlugin(require('@medley/serve-static'), {
+  root: path.join(__dirname, 'static'),
+  prefix: '/static/'
+});
+// A request to "/static/styles.css" will get 'styles.css' in the './static' folder
+```
 
 #### `setHeaders`
 
@@ -116,3 +125,6 @@ app.use('/static/', (staticApp) => {
   });
 });
 ```
+
+Note that `app.use()` with the `prefix` parameter is an alternative to using
+the [`prefix`](#prefix) option above.
