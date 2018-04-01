@@ -329,19 +329,3 @@ it('should forward 404 errors to the custom error handler', () => {
     assert.strictEqual(res.payload, 'Not Found: /no-file.html');
   });
 });
-
-it('should allow 404 errors to be forwarded to the not-found handler', () => {
-  const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
-
-  app.setErrorHandler((err, req, res) => {
-    assert.strictEqual(err.status, 404);
-    res.notFound();
-  });
-
-  return app.inject('/no-file.html').then((res) => {
-    assert.strictEqual(res.statusCode, 404);
-    assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8');
-    assert.strictEqual(res.payload, 'Not Found: GET /no-file.html');
-  });
-});

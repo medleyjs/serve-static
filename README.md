@@ -112,19 +112,15 @@ function:
 
 ```js
 app.use('/static/', (staticApp) => {
-  staticApp.registerPlugin(serveStatic, {
+  staticApp.registerPlugin(require('@medley/serve-static'), {
     root: path.join(__dirname, 'static')
   });
   
   staticApp.setErrorHandler((err, req, res) => {
-    if (err.status === 404) {
-      res.notFound(); // Forward 404 errors to the not-found handler
-    } else {
-      res.send(err.status + ' Error');
-    }
+    // Send error response
   });
 });
 ```
 
-Note that `app.use()` with the `prefix` parameter is an alternative to using
+Note that calling `app.use()` with the `prefix` parameter is an alternative to using
 the [`prefix`](#prefix) option above.
