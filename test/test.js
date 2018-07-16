@@ -111,13 +111,13 @@ it('should pass send options to the send module', () => {
 
   const app = medley();
 
-  app.registerPlugin(serveStaticMock, pluginOptions);
+  app.register(serveStaticMock, pluginOptions);
   app.inject('/index.html');
 });
 
 it('should serve the correct files from the root', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   return Promise.all([
     app.inject('/'),
@@ -137,7 +137,7 @@ it('should serve the correct files from the root', () => {
 it('should serve the correct files with a prefix', () => {
   const app = medley();
 
-  app.registerPlugin(serveStatic, {
+  app.register(serveStatic, {
     root: testStaticRoot,
     prefix: '/prefix',
   });
@@ -160,7 +160,7 @@ it('should serve the correct files with a prefix', () => {
 it('should serve the correct files with a prefix with a trailing slash', () => {
   const app = medley();
 
-  app.registerPlugin(serveStatic, {
+  app.register(serveStatic, {
     root: testStaticRoot,
     prefix: '/prefix/',
   });
@@ -180,11 +180,11 @@ it('should serve the correct files with a prefix with a trailing slash', () => {
   });
 });
 
-it('should serve the correct files with a prefix created by app.use()', () => {
+it('should serve the correct files with a prefix created by app.encapsulate()', () => {
   const app = medley();
 
-  app.use('/prefix', (subApp) => {
-    subApp.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.encapsulate('/prefix', (subApp) => {
+    subApp.register(serveStatic, {root: testStaticRoot});
   });
 
   return Promise.all([
@@ -205,7 +205,7 @@ it('should serve the correct files with a prefix created by app.use()', () => {
 it('should respond with a 404 to URLs without a trailing "/" if they do not point to a file', () => {
   const app = medley();
 
-  app.registerPlugin(serveStatic, {
+  app.register(serveStatic, {
     root: testStaticRoot,
     prefix: '/prefix',
   });
@@ -221,7 +221,7 @@ it('should respond with a 404 to URLs without a trailing "/" if they do not poin
 
 it('should serve files with the correct Content-Type', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   return Promise.all([
     app.inject('/index.html'),
@@ -241,7 +241,7 @@ it('should call the setHeaders function with the correct arguments', () => {
     assert.strictEqual(typeof stat.isDirectory, 'function');
   }
 
-  app.registerPlugin(serveStatic, {root: testStaticRoot, setHeaders});
+  app.register(serveStatic, {root: testStaticRoot, setHeaders});
 
   return app.inject('/index.html').then((res) => {
     assert.strictEqual(res.statusCode, 200);
@@ -258,7 +258,7 @@ it('should allow the setHeaders function to set and change headers', () => {
     res.setHeader('content-type', 'custom/type');
   }
 
-  app.registerPlugin(serveStatic, {root: testStaticRoot, setHeaders});
+  app.register(serveStatic, {root: testStaticRoot, setHeaders});
 
   return app.inject('/index.html').then((res) => {
     assert.strictEqual(res.statusCode, 200);
@@ -270,7 +270,7 @@ it('should allow the setHeaders function to set and change headers', () => {
 
 it('should forward 403 errors to the default error handler', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   return app.inject('/../index.html').then((res) => {
     assert.strictEqual(res.statusCode, 403);
@@ -285,7 +285,7 @@ it('should forward 403 errors to the default error handler', () => {
 
 it('should forward 403 errors to the custom error handler', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   app.setErrorHandler((err, req, res) => {
     assert.strictEqual(err.status, 403);
@@ -303,7 +303,7 @@ it('should forward 403 errors to the custom error handler', () => {
 
 it('should forward 404 errors to the default error handler', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   return app.inject('/no-file.html').then((res) => {
     assert.strictEqual(res.statusCode, 404);
@@ -314,7 +314,7 @@ it('should forward 404 errors to the default error handler', () => {
 
 it('should forward 404 errors to the custom error handler', () => {
   const app = medley();
-  app.registerPlugin(serveStatic, {root: testStaticRoot});
+  app.register(serveStatic, {root: testStaticRoot});
 
   app.setErrorHandler((err, req, res) => {
     assert.strictEqual(err.status, 404);
