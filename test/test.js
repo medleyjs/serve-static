@@ -180,12 +180,11 @@ it('should serve the correct files with a prefix with a trailing slash', () => {
   });
 });
 
-it('should serve the correct files with a prefix created by app.encapsulate()', () => {
+it('should serve the correct files with a prefix created by a sub-app', () => {
   const app = medley();
 
-  app.encapsulate('/prefix', (subApp) => {
-    subApp.register(serveStatic, {root: testStaticRoot});
-  });
+  app.createSubApp('/prefix')
+    .register(serveStatic, {root: testStaticRoot});
 
   return Promise.all([
     app.inject('/prefix/'),
