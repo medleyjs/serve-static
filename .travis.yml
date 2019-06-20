@@ -1,13 +1,23 @@
 language: node_js
 node_js:
-  - '6'
-  - '8'
+  - '12'
   - '10'
+  - '8'
 after_success: npm run coveralls
-deploy:
-  provider: npm
-  email: nwoltman@outlook.com
-  on:
-    tags: true
-  api_key:
-    secure: msDpMG6XDrK54SQe0pPf7Wi12fDqzuTO9MlKvop7zXCqVyoRRQXBfcbqCZ8jlBb/BwlW4ryt3Ty5VTdU39FYAV5xbRo742IqcMobxdNilMW6i5hvrA+hCPWVaXLQ/1B2yhWZ3lj7/+Up5c1RiQsytVLum/bqUDnjQCQaYQCyU9CpXF3s9hpY1WiFNing708bpBi3xNlIGoGYRZy15TslpWiBhcjbYg5Dhc+KUMRH9518S6kdHbJVNXzWi5CMeXUX9pNm6yg9Zsk8chNTqv0mwprOfb5CFfKRFLPz7203TqUWSfHKbORQSD+hcSenR08Mfe8H9nfacplQTjJdgd+v/fNP9U1/lmDGvielFN6Wg8DPsItNxZksOqGM94X0bhsG4ZUWGZ/b+WXGyW2ACVkkijSaWMCeUpLp5zQqJO+BX2j50cMxsG7X3hSs3sMSMnLOA0GrBblA9NGRKNdVUj5AOmmYRurvUn85GmDRamv9iin2uhq8ztEMxIKqeVmxeI7xiasp4Dyfj8k3S1qg0OdBGH7mtO9NY3DQ5WOR2N0gciVXSuY7sAVi5sf8aaytNZvDWKDQpJwk8U+KNCkDUndithqXVKsyVwyReq5vIyadE6Ho/w/FnlxvIUZUZvKI94eIU2yXWREqIotX5DQIsObfLS9vwyUw7/fWa2l7sfV5x4g=
+stages:
+  - test
+  - name: npm release
+    if: tag IS present
+jobs:
+  include:
+  - stage: npm release
+    install: skip
+    script: skip
+    after_success: true
+    deploy:
+      provider: npm
+      email: nwoltman@outlook.com
+      on:
+        tags: true
+      api_key:
+        secure: msDpMG6XDrK54SQe0pPf7Wi12fDqzuTO9MlKvop7zXCqVyoRRQXBfcbqCZ8jlBb/BwlW4ryt3Ty5VTdU39FYAV5xbRo742IqcMobxdNilMW6i5hvrA+hCPWVaXLQ/1B2yhWZ3lj7/+Up5c1RiQsytVLum/bqUDnjQCQaYQCyU9CpXF3s9hpY1WiFNing708bpBi3xNlIGoGYRZy15TslpWiBhcjbYg5Dhc+KUMRH9518S6kdHbJVNXzWi5CMeXUX9pNm6yg9Zsk8chNTqv0mwprOfb5CFfKRFLPz7203TqUWSfHKbORQSD+hcSenR08Mfe8H9nfacplQTjJdgd+v/fNP9U1/lmDGvielFN6Wg8DPsItNxZksOqGM94X0bhsG4ZUWGZ/b+WXGyW2ACVkkijSaWMCeUpLp5zQqJO+BX2j50cMxsG7X3hSs3sMSMnLOA0GrBblA9NGRKNdVUj5AOmmYRurvUn85GmDRamv9iin2uhq8ztEMxIKqeVmxeI7xiasp4Dyfj8k3S1qg0OdBGH7mtO9NY3DQ5WOR2N0gciVXSuY7sAVi5sf8aaytNZvDWKDQpJwk8U+KNCkDUndithqXVKsyVwyReq5vIyadE6Ho/w/FnlxvIUZUZvKI94eIU2yXWREqIotX5DQIsObfLS9vwyUw7/fWa2l7sfV5x4g=
