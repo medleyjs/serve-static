@@ -27,7 +27,7 @@
     "medley"
   ],
   "dependencies": {
-    "send": "^0.16.2"
+    "send": "^0.17.1"
   },
   "devDependencies": {
     "@medley/medley": "^0.10.0",
