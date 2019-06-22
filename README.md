@@ -10,10 +10,8 @@
 ## Installation
 
 ```sh
-# npm
 npm install @medley/serve-static --save
-
-# yarn
+# or
 yarn add @medley/serve-static
 ```
 
@@ -25,7 +23,7 @@ const path = require('path');
 
 const app = medley();
 
-app.registerPlugin(require('@medley/serve-static'), {
+app.register(require('@medley/serve-static'), {
   root: path.join(__dirname, 'static')
 });
 // Serves files in the './static' folder from the root "/" URL
@@ -50,7 +48,7 @@ const path = require('path');
 
 const app = medley();
 
-app.registerPlugin(require('@medley/serve-static'), {
+app.register(require('@medley/serve-static'), {
   root: path.join(__dirname, 'static'),
   prefix: '/static/'
 });
@@ -79,7 +77,7 @@ function setHeaders(res, filePath, stats) {
   res.setHeader('content-disposition', contentDisposition(filePath));
 }
 
-app.registerPlugin(require('@medley/serve-static'), {
+app.register(require('@medley/serve-static'), {
   root: path.join(__dirname, 'downloads'),
   setHeaders: setHeaders
 });
@@ -106,21 +104,21 @@ If an error occurs while trying to send a file, the error will be passed to Medl
 This includes 404 errors for requests to paths without a matching file. A custom error handler can
 be set with [`app.setErrorHandler()`](https://github.com/medleyjs/medley/blob/master/docs/App.md#set-error-handler).
 
-To set a custom error handler that will only run for errors from `serve-static`, set the error
-handler inside an [`app.use()`](https://github.com/medleyjs/medley/blob/master/docs/App.md#use)
-function:
+To set a custom error handler that will only run for errors from `serve-static`,
+register both the plugin and the error handler on a prefixed
+[sub-app](https://github.com/medleyjs/medley/blob/master/docs/App.md#createsubapp):
 
 ```js
-app.use('/static/', (staticApp) => {
-  staticApp.registerPlugin(require('@medley/serve-static'), {
-    root: path.join(__dirname, 'static')
-  });
-  
-  staticApp.setErrorHandler((err, req, res) => {
-    // Send error response
-  });
+const staticApp = app.createSubApp('/static/');
+
+staticApp.register(require('@medley/serve-static'), {
+  root: path.join(__dirname, 'static')
+});
+
+staticApp.setErrorHandler((err, req, res) => {
+  // Send error response
 });
 ```
 
-Note that calling `app.use()` with the `prefix` parameter is an alternative to using
+**Tip:** Registering the plugin on a prefixed sub-app is an alternative to using
 the [`prefix`](#prefix) option above.
