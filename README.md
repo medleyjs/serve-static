@@ -55,6 +55,9 @@ app.register(require('@medley/serve-static'), {
 // A request to "/static/styles.css" will get 'styles.css' in the './static' folder
 ```
 
+Tip: Registering the plugin on a prefixed sub-app is an alternative to
+using this option.
+
 #### `setHeaders`
 
 Default: `undefined`
@@ -98,27 +101,13 @@ The following options are also supported and will be passed directly to the
 + [`lastModified`](https://www.npmjs.com/package/send#lastmodified)
 + [`maxAge`](https://www.npmjs.com/package/send#maxage)
 
-### Handling Errors
+### About Errors
 
-If an error occurs while trying to send a file, the error will be passed to Medley's error handler.
-This includes 404 errors for requests to paths without a matching file. A custom error handler can
-be set with [`app.setErrorHandler()`](https://github.com/medleyjs/medley/blob/master/docs/App.md#set-error-handler).
+The `send` module is only designed to work with the native Node `http` module,
+so handling errors when using this module with Medley doesn’t work very well
+(without writing major workarounds that could end up hurting performance).
 
-To set a custom error handler that will only run for errors from `serve-static`,
-register both the plugin and the error handler on a prefixed
-[sub-app](https://github.com/medleyjs/medley/blob/master/docs/App.md#createsubapp):
-
-```js
-const staticApp = app.createSubApp('/static/');
-
-staticApp.register(require('@medley/serve-static'), {
-  root: path.join(__dirname, 'static')
-});
-
-staticApp.setErrorHandler((err, req, res) => {
-  // Send error response
-});
-```
-
-**Tip:** Registering the plugin on a prefixed sub-app is an alternative to using
-the [`prefix`](#prefix) option above.
+For this reason, if an error occurs while trying to send a file (including 404
+errors when a file isn’t found), the error will be sent to Medley's
+[`onErrorSending`](https://github.com/medleyjs/medley/blob/master/docs/Medley.md#onerrorsending)
+function and a response will be sent automatically.

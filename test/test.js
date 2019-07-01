@@ -13,10 +13,8 @@ const indexContent = fs.readFileSync(path.join(testStaticRoot, 'index.html'), 'u
 const stylesContent = fs.readFileSync(path.join(testStaticRoot, 'styles.css'), 'utf8');
 const nestedIndexContent = fs.readFileSync(path.join(testStaticRoot, 'nested/index.html'), 'utf8');
 
-function makeApp() {
-  const app = medley();
-  app.register(selfRequest);
-  return app;
+function makeApp(opts) {
+  return medley(opts).register(selfRequest);
 }
 
 describe('serve-static', () => {
@@ -221,6 +219,11 @@ describe('serve-static', () => {
     ]).then((results) => {
       assert.strictEqual(results[0].statusCode, 404);
       assert.strictEqual(results[1].statusCode, 404);
+      assert.deepStrictEqual(JSON.parse(results[1].body), {
+        error: 'Not Found',
+        message: 'Not Found: /prefix/nested',
+        statusCode: 404,
+      });
     });
   });
 
@@ -288,26 +291,42 @@ describe('serve-static', () => {
     });
   });
 
-  it('should forward 403 errors to the custom error handler', async () => {
-    const app = makeApp();
-    app.register(serveStatic, {root: testStaticRoot});
+  // it('should forward 403 errors to onError hooks', async () => {
+  //   const app = makeApp();
 
-    app.setErrorHandler((err, req, res) => {
-      assert.strictEqual(err.status, 403);
-      assert.strictEqual(err.message, 'Forbidden');
+  //   app.register(serveStatic, {root: testStaticRoot});
 
-      res.send('Custom error response');
+  //   app.addHook('onError', (err, req, res) => {
+  //     assert.strictEqual(err.status, 403);
+  //     assert.strictEqual(err.message, 'Forbidden');
+
+  //     res.status(err.status).send('Custom error response');
+  //   });
+
+  //   const res = await app.request('/', {path: '/../index.html'});
+
+  //   assert.strictEqual(res.statusCode, 403);
+  //   assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8');
+  //   assert.strictEqual(res.body, 'Custom error response');
+  // });
+
+  it('should pass 403 errors to the onErrorSending function', async () => {
+    const app = makeApp({
+      onErrorSending(err) {
+        assert.strictEqual(err.status, 403);
+        assert.strictEqual(err.message, 'Forbidden');
+      },
     });
 
-    const res = await app.request('/', {path: '/../index.html'});
+    app.register(serveStatic, {root: testStaticRoot});
 
+    const res = await app.request('/', {path: '/../index.html'});
     assert.strictEqual(res.statusCode, 403);
-    assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8');
-    assert.strictEqual(res.body, 'Custom error response');
   });
 
   it('should forward 404 errors to the default error handler', async () => {
     const app = makeApp();
+
     app.register(serveStatic, {root: testStaticRoot});
 
     const res = await app.request('/no-file.html');
@@ -317,22 +336,37 @@ describe('serve-static', () => {
     assert.strictEqual(JSON.parse(res.body).error, 'Not Found');
   });
 
-  it('should forward 404 errors to the custom error handler', async () => {
-    const app = makeApp();
-    app.register(serveStatic, {root: testStaticRoot});
+  // it('should forward 404 errors to onError hooks', async () => {
+  //   const app = makeApp();
 
-    app.setErrorHandler((err, req, res) => {
-      assert.strictEqual(err.status, 404);
-      assert(err.message.startsWith('ENOENT'));
+  //   app.register(serveStatic, {root: testStaticRoot});
 
-      res.send('Not Found: ' + req.url);
+  //   app.addHook('onError', (err, req, res) => {
+  //     assert.strictEqual(err.status, 404);
+  //     assert.ok(err.message.startsWith('ENOENT'));
+
+  //     res.status(err.status).send('Not Found: ' + req.url);
+  //   });
+
+  //   const res = await app.request('/no-file.html');
+
+  //   assert.strictEqual(res.statusCode, 404);
+  //   assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8');
+  //   assert.strictEqual(res.body, 'Not Found: /no-file.html');
+  // });
+
+  it('should pass 404 errors to the onErrorSending function', async () => {
+    const app = makeApp({
+      onErrorSending(err) {
+        assert.strictEqual(err.status, 404);
+        assert.ok(err.message.startsWith('ENOENT: no such file or directory'));
+      },
     });
 
-    const res = await app.request('/no-file.html');
+    app.register(serveStatic, {root: testStaticRoot});
 
+    const res = await app.request('/no-file.html');
     assert.strictEqual(res.statusCode, 404);
-    assert.strictEqual(res.headers['content-type'], 'text/plain; charset=utf-8');
-    assert.strictEqual(res.body, 'Not Found: /no-file.html');
   });
 
 });

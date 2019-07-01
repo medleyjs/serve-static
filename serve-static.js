@@ -49,7 +49,7 @@ function serveStatic(app, options) {
   });
 
   function onDirectory() {
-    this.error(404);
+    this.error(404, new Error('Not Found: ' + this.req.url));
   }
 
   function onHeaders(nodeRes, filePath, stat) {
