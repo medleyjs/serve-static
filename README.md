@@ -10,7 +10,7 @@
 ## Installation
 
 ```sh
-npm install @medley/serve-static --save
+npm install @medley/serve-static
 # or
 yarn add @medley/serve-static
 ```
